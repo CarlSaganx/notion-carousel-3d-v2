@@ -55,7 +55,7 @@
 
 <script>
   const swiper = new Swiper('.swiper', {
-    loop: true,
+    loop: false, // ✅ DISABLED loop mode to prevent hidden clones
     pagination: { el: '.swiper-pagination', clickable: true },
     navigation: {
       nextEl: '.swiper-button-next',
@@ -69,7 +69,6 @@
 
   function initViewers() {
     document.querySelectorAll('.viewer').forEach(viewer => {
-      // Skip if already initialized or not visible (Swiper hides inactive slides)
       if (viewer.hasChildNodes() || !viewer.offsetParent) return;
 
       const scene = new THREE.Scene();
