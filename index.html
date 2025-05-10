@@ -47,11 +47,11 @@
   <div class="swiper-button-next"></div>
 </div>
 
-<!-- Scripts -->
+<!-- Libraries -->
 <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
 <script src="js/three.min.js"></script>
 <script src="js/STLLoader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.146.0/examples/js/controls/OrbitControls.js"></script>
+<script src="js/OrbitControls.js"></script>
 
 <script>
   const swiper = new Swiper('.swiper', {
@@ -74,7 +74,7 @@
       const scene = new THREE.Scene();
       const aspect = viewer.clientWidth / viewer.clientHeight;
       const camera = new THREE.PerspectiveCamera(45, aspect, 0.1, 1000);
-      camera.position.set(0, 0, 300); // move camera farther away
+      camera.position.set(0, 0, 300); // farther away
 
       const renderer = new THREE.WebGLRenderer({ alpha: true });
       renderer.setSize(viewer.clientWidth, viewer.clientHeight);
@@ -86,8 +86,7 @@
       const ambientLight = new THREE.AmbientLight(0x888888);
       const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
       directionalLight.position.set(50, 50, 50).normalize();
-      scene.add(ambientLight);
-      scene.add(directionalLight);
+      scene.add(ambientLight, directionalLight);
 
       const grid = new THREE.GridHelper(200, 10);
       scene.add(grid);
@@ -98,18 +97,14 @@
         geometry => {
           const material = new THREE.MeshPhongMaterial({ color: 0x2194ce });
           const mesh = new THREE.Mesh(geometry, material);
-
           geometry.computeBoundingBox();
           const center = geometry.boundingBox.getCenter(new THREE.Vector3());
           mesh.geometry.translate(-center.x, -center.y, -center.z);
-
-          mesh.scale.set(0.01, 0.01, 0.01); // scale down large models
-
+          mesh.scale.set(0.01, 0.01, 0.01); // scale down model
           scene.add(mesh);
 
           const animate = () => {
             requestAnimationFrame(animate);
-            mesh.rotation.y += 0.01;
             controls.update();
             renderer.render(scene, camera);
           };
