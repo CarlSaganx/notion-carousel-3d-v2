@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>3D Model Carousel - Test Model</title>
+  <title>3D Model Carousel - Final Fix</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+  <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css"/>
 
   <style>
     body {
@@ -62,14 +62,15 @@
       prevEl: '.swiper-button-prev'
     },
     on: {
-      init: () => initViewers(),
-      slideChangeTransitionEnd: () => initViewers()
+      init: () => setTimeout(initViewers, 50),
+      slideChangeTransitionEnd: () => setTimeout(initViewers, 50)
     }
   });
 
   function initViewers() {
     document.querySelectorAll('.viewer').forEach(viewer => {
-      if (viewer.hasChildNodes()) return;
+      // Skip if already initialized or not visible (Swiper hides inactive slides)
+      if (viewer.hasChildNodes() || !viewer.offsetParent) return;
 
       const scene = new THREE.Scene();
       const aspect = viewer.clientWidth / viewer.clientHeight;
