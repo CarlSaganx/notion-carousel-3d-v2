@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>3D Model Carousel</title>
+  <title>3D Model Carousel - Test Model</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
 
   <style>
     body {
@@ -38,16 +38,16 @@
 
 <div class="swiper">
   <div class="swiper-wrapper">
-    <div class="swiper-slide"><div class="viewer" data-src="models/DRONEENSAMBLAJE.stl"></div></div>
-    <div class="swiper-slide"><div class="viewer" data-src="models/escalahelice.stl"></div></div>
-    <div class="swiper-slide"><div class="viewer" data-src="models/partebajadrone.stl"></div></div>
+    <div class="swiper-slide">
+      <div class="viewer" data-src="https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/stl/ascii/slotted_disk.stl"></div>
+    </div>
   </div>
   <div class="swiper-pagination"></div>
   <div class="swiper-button-prev"></div>
   <div class="swiper-button-next"></div>
 </div>
 
-<!-- Libraries -->
+<!-- JS libraries -->
 <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
 <script src="js/three.min.js"></script>
 <script src="js/STLLoader.js"></script>
@@ -74,7 +74,7 @@
       const scene = new THREE.Scene();
       const aspect = viewer.clientWidth / viewer.clientHeight;
       const camera = new THREE.PerspectiveCamera(45, aspect, 0.1, 1000);
-      camera.position.set(0, 0, 300); // farther away
+      camera.position.set(0, 0, 300);
 
       const renderer = new THREE.WebGLRenderer({ alpha: true });
       renderer.setSize(viewer.clientWidth, viewer.clientHeight);
@@ -83,13 +83,12 @@
       const controls = new THREE.OrbitControls(camera, renderer.domElement);
       controls.update();
 
+      scene.add(new THREE.GridHelper(200, 10));
+
       const ambientLight = new THREE.AmbientLight(0x888888);
       const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
       directionalLight.position.set(50, 50, 50).normalize();
       scene.add(ambientLight, directionalLight);
-
-      const grid = new THREE.GridHelper(200, 10);
-      scene.add(grid);
 
       const loader = new THREE.STLLoader();
       loader.load(
@@ -97,10 +96,12 @@
         geometry => {
           const material = new THREE.MeshPhongMaterial({ color: 0x2194ce });
           const mesh = new THREE.Mesh(geometry, material);
+
           geometry.computeBoundingBox();
           const center = geometry.boundingBox.getCenter(new THREE.Vector3());
           mesh.geometry.translate(-center.x, -center.y, -center.z);
-          mesh.scale.set(0.01, 0.01, 0.01); // scale down model
+          mesh.scale.set(0.01, 0.01, 0.01);
+
           scene.add(mesh);
 
           const animate = () => {
