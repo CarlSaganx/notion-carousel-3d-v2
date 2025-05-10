@@ -39,7 +39,9 @@
   const controls = new THREE.OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
 
-  scene.add(new THREE.GridHelper(200, 10));
+  const grid = new THREE.GridHelper(200, 10);
+  grid.rotation.x = Math.PI / 2; // rotate 90° to match model orientation
+  scene.add(grid);
 
   const ambient = new THREE.AmbientLight(0x888888);
   scene.add(ambient);
