@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>STL Model Viewer</title>
+  <title>STL Viewer with Auto-Scaling</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     html, body {
@@ -31,7 +31,6 @@
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
   camera.position.set(0, 0, 300);
-  camera.lookAt(new THREE.Vector3(0, 0, 0));
 
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -49,16 +48,29 @@
   scene.add(directional);
 
   const loader = new THREE.STLLoader();
+
+  // Load your actual model from GitHub Pages
   loader.load(
-    "https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/stl/ascii/slotted_disk.stl",
+    "models/DRONEENSAMBLAJE.stl",
     geometry => {
-      const material = new THREE.MeshPhongMaterial({ color: 0x0077ff, shininess: 100 });
+      const material = new THREE.MeshPhongMaterial({ color: 0x2194ce, shininess: 100 });
       const mesh = new THREE.Mesh(geometry, material);
+
+      // Center the geometry
       geometry.computeBoundingBox();
       const center = geometry.boundingBox.getCenter(new THREE.Vector3());
       mesh.geometry.translate(-center.x, -center.y, -center.z);
-      mesh.scale.set(1, 1, 1); // No scaling
+
+      // Auto-scale to fit the viewport
+      const size = geometry.boundingBox.getSize(new THREE.Vector3());
+      const maxDim = Math.max(size.x, size.y, size.z);
+      const scale = 100 / maxDim;
+      mesh.scale.set(scale, scale, scale);
+
       scene.add(mesh);
+
+      // Point camera at model
+      camera.lookAt(new THREE.Vector3(0, 0, 0));
     },
     undefined,
     error => console.error("STL load error:", error)
