@@ -2,122 +2,80 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>3D Model Carousel - Final Fix</title>
+  <title>STL Model Viewer</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css"/>
-
   <style>
-    body {
+    html, body {
       margin: 0;
-      background: #f0f0f0;
-      font-family: sans-serif;
-    }
-    .swiper {
-      width: 100%;
-      max-width: 800px;
-      height: 500px;
-      margin: 40px auto;
-    }
-    .swiper-slide {
-      background: #fff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      border-radius: 12px;
-      box-shadow: 0 0 12px rgba(0,0,0,0.1);
-    }
-    canvas {
-      width: 100%;
       height: 100%;
+      background: #f0f0f0;
+    }
+    #viewer {
+      width: 100%;
+      height: 100vh;
       display: block;
-      border-radius: 12px;
     }
   </style>
 </head>
 <body>
+<div id="viewer"></div>
 
-<div class="swiper">
-  <div class="swiper-wrapper">
-    <div class="swiper-slide">
-      <div class="viewer" data-src="https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/stl/ascii/slotted_disk.stl"></div>
-    </div>
-  </div>
-  <div class="swiper-pagination"></div>
-  <div class="swiper-button-prev"></div>
-  <div class="swiper-button-next"></div>
-</div>
-
-<!-- JS libraries -->
-<script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+<!-- Three.js and dependencies -->
 <script src="js/three.min.js"></script>
 <script src="js/STLLoader.js"></script>
 <script src="js/OrbitControls.js"></script>
 
 <script>
-  const swiper = new Swiper('.swiper', {
-    loop: false, // ✅ DISABLED loop mode to prevent hidden clones
-    pagination: { el: '.swiper-pagination', clickable: true },
-    navigation: {
-      nextEl: '.swiper-button-next',
-      prevEl: '.swiper-button-prev'
+  const container = document.getElementById("viewer");
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+  camera.position.set(0, 0, 300);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  container.appendChild(renderer.domElement);
+
+  const controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+
+  scene.add(new THREE.GridHelper(200, 10));
+
+  const ambient = new THREE.AmbientLight(0x888888);
+  scene.add(ambient);
+  const directional = new THREE.DirectionalLight(0xffffff, 1);
+  directional.position.set(50, 50, 50).normalize();
+  scene.add(directional);
+
+  const loader = new THREE.STLLoader();
+  loader.load(
+    // Known working model
+    "https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/stl/ascii/slotted_disk.stl",
+    geometry => {
+      const material = new THREE.MeshPhongMaterial({ color: 0x2194ce });
+      const mesh = new THREE.Mesh(geometry, material);
+      geometry.computeBoundingBox();
+      const center = geometry.boundingBox.getCenter(new THREE.Vector3());
+      mesh.geometry.translate(-center.x, -center.y, -center.z);
+      mesh.scale.set(0.01, 0.01, 0.01);
+      scene.add(mesh);
     },
-    on: {
-      init: () => setTimeout(initViewers, 50),
-      slideChangeTransitionEnd: () => setTimeout(initViewers, 50)
-    }
-  });
+    undefined,
+    error => console.error("STL load error:", error)
+  );
 
-  function initViewers() {
-    document.querySelectorAll('.viewer').forEach(viewer => {
-      if (viewer.hasChildNodes() || !viewer.offsetParent) return;
-
-      const scene = new THREE.Scene();
-      const aspect = viewer.clientWidth / viewer.clientHeight;
-      const camera = new THREE.PerspectiveCamera(45, aspect, 0.1, 1000);
-      camera.position.set(0, 0, 300);
-
-      const renderer = new THREE.WebGLRenderer({ alpha: true });
-      renderer.setSize(viewer.clientWidth, viewer.clientHeight);
-      viewer.appendChild(renderer.domElement);
-
-      const controls = new THREE.OrbitControls(camera, renderer.domElement);
-      controls.update();
-
-      scene.add(new THREE.GridHelper(200, 10));
-
-      const ambientLight = new THREE.AmbientLight(0x888888);
-      const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-      directionalLight.position.set(50, 50, 50).normalize();
-      scene.add(ambientLight, directionalLight);
-
-      const loader = new THREE.STLLoader();
-      loader.load(
-        viewer.dataset.src,
-        geometry => {
-          const material = new THREE.MeshPhongMaterial({ color: 0x2194ce });
-          const mesh = new THREE.Mesh(geometry, material);
-
-          geometry.computeBoundingBox();
-          const center = geometry.boundingBox.getCenter(new THREE.Vector3());
-          mesh.geometry.translate(-center.x, -center.y, -center.z);
-          mesh.scale.set(0.01, 0.01, 0.01);
-
-          scene.add(mesh);
-
-          const animate = () => {
-            requestAnimationFrame(animate);
-            controls.update();
-            renderer.render(scene, camera);
-          };
-          animate();
-        },
-        undefined,
-        error => {
-          console.error("STL load error:", error);
-        }
-      );
-    });
+  function animate() {
+    requestAnimationFrame(animate);
+    controls.update();
+    renderer.render(scene, camera);
   }
+  animate();
+
+  window.addEventListener("resize", () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
 </script>
 </body>
 </html>
